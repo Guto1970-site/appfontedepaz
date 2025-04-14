@@ -1,3 +1,18 @@
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#2563eb">
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js')
+        .then(registration => console.log('SW registrado'))
+        .catch(error => console.log('Erro no registro do SW:', error));
+    });
+  }
+</script>
+
+
+
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -74,11 +89,182 @@
         .dark ::-webkit-scrollbar-thumb {
             background: var(--primary-dark);
         }
+        
+        /* Form animations */
+        .form-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+        }
+        
+        .form-shake {
+            animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+        }
+        
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-1px, 0, 0); }
+            20%, 80% { transform: translate3d(2px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+            40%, 60% { transform: translate3d(4px, 0, 0); }
+        }
+        
+        .slide-up {
+            animation: slideUp 0.3s ease-out forwards;
+        }
+        
+        @keyframes slideUp {
+            from { transform: translateY(10px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
     </style>
 </head>
 <body class="bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 transition-colors duration-300">
+    <!-- Auth Screen -->
+    <div id="auth-screen" class="screen absolute inset-0 flex items-center justify-center p-4 bg-gradient-to-b from-blue-50 to-white dark:from-gray-800 dark:to-gray-900">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-6 w-full max-w-md">
+            <!-- Auth Header with Tabs -->
+            <div class="flex justify-center mb-6">
+                <div class="rounded-full bg-white dark:bg-gray-700 p-5 shadow-md">
+                    <i class="fas fa-church text-primary text-5xl"></i>
+                </div>
+            </div>
+            
+            <h1 class="text-2xl font-bold text-center text-primary dark:text-primary-light mb-2">Comunidade App</h1>
+            <p class="text-center text-gray-600 dark:text-gray-400 mb-6">Conectando vidas, compartilhando fé</p>
+            
+            <div class="flex border-b border-gray-200 dark:border-gray-700 mb-6">
+                <button id="login-tab" class="auth-tab flex-1 py-2 font-medium text-center border-b-2 border-primary text-primary dark:text-primary-light">Entrar</button>
+                <button id="register-tab" class="auth-tab flex-1 py-2 font-medium text-center border-b-2 border-transparent text-gray-500 dark:text-gray-400">Registrar</button>
+            </div>
+            
+            <!-- Login Form -->
+            <form id="login-form" class="space-y-4">
+                <div>
+                    <label for="login-email" class="block text-sm font-medium mb-1">Email</label>
+                    <input type="email" id="login-email" class="form-input w-full px-3 py-2 bg-blue-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-base transition-all" placeholder="seu@email.com" required>
+                    <p class="error-message text-red-500 text-xs mt-1 hidden">Por favor, informe um email válido</p>
+                </div>
+                <div>
+                    <label for="login-password" class="block text-sm font-medium mb-1">Senha</label>
+                    <div class="relative">
+                        <input type="password" id="login-password" class="form-input w-full px-3 py-2 bg-blue-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-base transition-all" placeholder="******" required>
+                        <button type="button" class="toggle-password absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                    <p class="error-message text-red-500 text-xs mt-1 hidden">Senha incorreta</p>
+                </div>
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="remember-me" class="h-4 w-4 text-primary">
+                        <label for="remember-me" class="ml-2 text-sm text-gray-600 dark:text-gray-400">Lembrar-me</label>
+                    </div>
+                    <button type="button" id="forgot-password" class="text-sm text-primary dark:text-primary-light hover:underline">Esqueceu a senha?</button>
+                </div>
+                <button type="submit" class="w-full bg-primary hover:bg-primary-dark dark:bg-primary-dark dark:hover:bg-primary text-white font-bold py-3 rounded-lg transition-colors shadow-md">
+                    Entrar
+                </button>
+            </form>
+            
+            <!-- Register Form -->
+            <form id="register-form" class="space-y-4 hidden">
+                <div>
+                    <label for="register-name" class="block text-sm font-medium mb-1">Nome Completo</label>
+                    <input type="text" id="register-name" class="form-input w-full px-3 py-2 bg-blue-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-base transition-all" placeholder="Seu Nome" required>
+                    <p class="error-message text-red-500 text-xs mt-1 hidden">Por favor, informe seu nome completo</p>
+                </div>
+                <div>
+                    <label for="register-email" class="block text-sm font-medium mb-1">Email</label>
+                    <input type="email" id="register-email" class="form-input w-full px-3 py-2 bg-blue-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-base transition-all" placeholder="seu@email.com" required>
+                    <p class="error-message text-red-500 text-xs mt-1 hidden">Por favor, informe um email válido</p>
+                </div>
+                <div>
+                    <label for="register-password" class="block text-sm font-medium mb-1">Senha</label>
+                    <div class="relative">
+                        <input type="password" id="register-password" class="form-input w-full px-3 py-2 bg-blue-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-base transition-all" placeholder="******" required>
+                        <button type="button" class="toggle-password absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                    <p class="error-message text-red-500 text-xs mt-1 hidden">A senha deve ter pelo menos 6 caracteres</p>
+                </div>
+                <div>
+                    <label for="register-confirm-password" class="block text-sm font-medium mb-1">Confirmar Senha</label>
+                    <div class="relative">
+                        <input type="password" id="register-confirm-password" class="form-input w-full px-3 py-2 bg-blue-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-base transition-all" placeholder="******" required>
+                        <button type="button" class="toggle-password absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                    <p class="error-message text-red-500 text-xs mt-1 hidden">As senhas não coincidem</p>
+                </div>
+                <div class="flex items-center">
+                    <input type="checkbox" id="terms-agreement" class="h-4 w-4 text-primary">
+                    <label for="terms-agreement" class="ml-2 text-sm text-gray-600 dark:text-gray-400">
+                        Concordo com os <a href="#" class="text-primary dark:text-primary-light hover:underline">Termos</a> e <a href="#" class="text-primary dark:text-primary-light hover:underline">Política de Privacidade</a>
+                    </label>
+                </div>
+                <button type="submit" class="w-full bg-primary hover:bg-primary-dark dark:bg-primary-dark dark:hover:bg-primary text-white font-bold py-3 rounded-lg transition-colors shadow-md">
+                    Criar Conta
+                </button>
+            </form>
+            
+            <!-- Password Recovery Form -->
+            <form id="recovery-form" class="space-y-4 hidden">
+                <div class="text-center mb-4">
+                    <h2 class="text-xl font-bold text-primary dark:text-primary-light">Recuperar Senha</h2>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">Informe seu email para receber instruções de recuperação de senha</p>
+                </div>
+                <div>
+                    <label for="recovery-email" class="block text-sm font-medium mb-1">Email</label>
+                    <input type="email" id="recovery-email" class="form-input w-full px-3 py-2 bg-blue-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-base transition-all" placeholder="seu@email.com" required>
+                    <p class="error-message text-red-500 text-xs mt-1 hidden">Por favor, informe um email válido</p>
+                </div>
+                <button type="submit" class="w-full bg-primary hover:bg-primary-dark dark:bg-primary-dark dark:hover:bg-primary text-white font-bold py-3 rounded-lg transition-colors shadow-md">
+                    Enviar Instruções
+                </button>
+                <button type="button" id="back-to-login" class="w-full bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-medium py-3 rounded-lg transition-colors">
+                    Voltar
+                </button>
+            </form>
+            
+            <!-- Social Login -->
+            <div class="mt-6">
+                <div class="relative">
+                    <div class="absolute inset-0 flex items-center">
+                        <div class="w-full border-t border-gray-300 dark:border-gray-700"></div>
+                    </div>
+                    <div class="relative flex justify-center text-sm">
+                        <span class="px-2 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400">Ou continue com</span>
+                    </div>
+                </div>
+                
+                <div class="mt-6 grid grid-cols-3 gap-3">
+                    <button type="button" class="social-login-btn flex justify-center items-center py-2 px-4 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                        <i class="fab fa-google text-red-500"></i>
+                    </button>
+                    <button type="button" class="social-login-btn flex justify-center items-center py-2 px-4 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                        <i class="fab fa-facebook-f text-blue-600"></i>
+                    </button>
+                    <button type="button" class="social-login-btn flex justify-center items-center py-2 px-4 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                        <i class="fab fa-apple text-gray-900 dark:text-white"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Theme toggle -->
+            <div class="mt-6 text-center">
+                <button id="auth-toggle-theme" class="text-sm text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary-light">
+                    <i class="fas fa-moon dark:hidden"></i>
+                    <i class="fas fa-sun hidden dark:inline"></i>
+                    <span class="ml-1 dark:hidden">Modo Escuro</span>
+                    <span class="ml-1 hidden dark:inline">Modo Claro</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Welcome Screen -->
-    <div id="welcome-screen" class="screen absolute inset-0 flex flex-col items-center justify-center p-4 bg-gradient-to-b from-blue-50 to-white dark:from-gray-800 dark:to-gray-900">
+    <div id="welcome-screen" class="screen absolute inset-0 flex flex-col items-center justify-center p-4 bg-gradient-to-b from-blue-50 to-white dark:from-gray-800 dark:to-gray-900 transform translate-x-full">
         <div class="mb-6 rounded-full bg-white dark:bg-gray-800 p-6 shadow-lg">
             <i class="fas fa-church text-primary text-7xl"></i>
         </div>
@@ -985,6 +1171,55 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // App State Management
+            const appState = {
+                isAuthenticated: false,
+                currentUser: null,
+                userDatabase: [
+                    { id: 1, name: 'João Silva', email: 'joao@exemplo.com', password: 'senha123' },
+                    { id: 2, name: 'Maria Santos', email: 'maria@exemplo.com', password: 'senha123' }
+                ],
+                login: function(email, password) {
+                    // Simulate server authentication
+                    const user = this.userDatabase.find(u => u.email.toLowerCase() === email.toLowerCase());
+                    if (!user) {
+                        return { success: false, message: 'Usuário não encontrado' };
+                    }
+                    if (user.password !== password) {
+                        return { success: false, message: 'Senha incorreta' };
+                    }
+                    
+                    this.isAuthenticated = true;
+                    this.currentUser = { id: user.id, name: user.name, email: user.email };
+                    
+                    return { success: true, user: this.currentUser };
+                },
+                register: function(name, email, password) {
+                    // Check if email already exists
+                    if (this.userDatabase.some(u => u.email.toLowerCase() === email.toLowerCase())) {
+                        return { success: false, message: 'Este email já está em uso' };
+                    }
+                    
+                    // Create new user
+                    const newUser = {
+                        id: this.userDatabase.length + 1,
+                        name: name,
+                        email: email,
+                        password: password
+                    };
+                    
+                    this.userDatabase.push(newUser);
+                    this.isAuthenticated = true;
+                    this.currentUser = { id: newUser.id, name: newUser.name, email: newUser.email };
+                    
+                    return { success: true, user: this.currentUser };
+                },
+                logout: function() {
+                    this.isAuthenticated = false;
+                    this.currentUser = null;
+                }
+            };
+            
             // Dark Mode Detection
             if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
                 document.documentElement.classList.add('dark');
@@ -1000,19 +1235,385 @@
             
             // Theme Toggle
             const themeToggle = document.getElementById('toggle-theme');
-            themeToggle.addEventListener('click', () => {
-                document.documentElement.classList.toggle('dark');
+            const authThemeToggle = document.getElementById('auth-toggle-theme');
+            
+            [themeToggle, authThemeToggle].forEach(toggle => {
+                if (toggle) {
+                    toggle.addEventListener('click', () => {
+                        document.documentElement.classList.toggle('dark');
+                    });
+                }
+            });
+            
+            // Auth Navigation
+            const authScreen = document.getElementById('auth-screen');
+            const welcomeScreen = document.getElementById('welcome-screen');
+            const mainApp = document.getElementById('main-app');
+            
+            // Auth Tab Switching
+            const loginTab = document.getElementById('login-tab');
+            const registerTab = document.getElementById('register-tab');
+            const loginForm = document.getElementById('login-form');
+            const registerForm = document.getElementById('register-form');
+            const recoveryForm = document.getElementById('recovery-form');
+            const forgotPasswordBtn = document.getElementById('forgot-password');
+            const backToLoginBtn = document.getElementById('back-to-login');
+            
+            function showForm(formToShow) {
+                [loginForm, registerForm, recoveryForm].forEach(form => {
+                    form.classList.add('hidden');
+                });
+                formToShow.classList.remove('hidden');
+                formToShow.classList.add('slide-up');
+                setTimeout(() => formToShow.classList.remove('slide-up'), 300);
+            }
+            
+            if (loginTab && registerTab) {
+                loginTab.addEventListener('click', () => {
+                    loginTab.classList.add('border-primary', 'text-primary', 'dark:text-primary-light');
+                    registerTab.classList.remove('border-primary', 'text-primary', 'dark:text-primary-light');
+                    registerTab.classList.add('border-transparent', 'text-gray-500', 'dark:text-gray-400');
+                    showForm(loginForm);
+                });
+                
+                registerTab.addEventListener('click', () => {
+                    registerTab.classList.add('border-primary', 'text-primary', 'dark:text-primary-light');
+                    loginTab.classList.remove('border-primary', 'text-primary', 'dark:text-primary-light');
+                    loginTab.classList.add('border-transparent', 'text-gray-500', 'dark:text-gray-400');
+                    showForm(registerForm);
+                });
+            }
+            
+            if (forgotPasswordBtn) {
+                forgotPasswordBtn.addEventListener('click', () => {
+                    showForm(recoveryForm);
+                });
+            }
+            
+            if (backToLoginBtn) {
+                backToLoginBtn.addEventListener('click', () => {
+                    showForm(loginForm);
+                    loginTab.classList.add('border-primary', 'text-primary', 'dark:text-primary-light');
+                    registerTab.classList.remove('border-primary', 'text-primary', 'dark:text-primary-light');
+                    registerTab.classList.add('border-transparent', 'text-gray-500', 'dark:text-gray-400');
+                });
+            }
+            
+            // Password visibility toggle
+            document.querySelectorAll('.toggle-password').forEach(toggle => {
+                toggle.addEventListener('click', function() {
+                    const passwordInput = this.previousElementSibling;
+                    const icon = this.querySelector('i');
+                    
+                    if (passwordInput.type === 'password') {
+                        passwordInput.type = 'text';
+                        icon.classList.remove('fa-eye');
+                        icon.classList.add('fa-eye-slash');
+                    } else {
+                        passwordInput.type = 'password';
+                        icon.classList.remove('fa-eye-slash');
+                        icon.classList.add('fa-eye');
+                    }
+                });
+            });
+            
+            // Form Validation & Submission
+            function validateEmail(email) {
+                const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+                return re.test(String(email).toLowerCase());
+            }
+            
+            function showError(inputElement, message) {
+                inputElement.classList.add('border-red-500');
+                const errorElement = inputElement.closest('div').querySelector('.error-message');
+                if (errorElement) {
+                    errorElement.textContent = message;
+                    errorElement.classList.remove('hidden');
+                }
+                inputElement.parentElement.classList.add('form-shake');
+                setTimeout(() => {
+                    inputElement.parentElement.classList.remove('form-shake');
+                }, 500);
+            }
+            
+            function clearError(inputElement) {
+                inputElement.classList.remove('border-red-500');
+                const errorElement = inputElement.closest('div').querySelector('.error-message');
+                if (errorElement) {
+                    errorElement.classList.add('hidden');
+                }
+            }
+            
+            function authenticate() {
+                // Transition from auth to main app
+                authScreen.style.transform = 'translateX(-100%)';
+                welcomeScreen.style.transform = 'translateX(0)';
+                
+                // Update UI to reflect authenticated user
+                const headerTitle = document.querySelector('header h1');
+                if (headerTitle && appState.currentUser) {
+                    headerTitle.textContent = `Olá, ${appState.currentUser.name.split(' ')[0]}`;
+                }
+                
+                // Add logout button to sidebar
+                const sidebarNav = document.querySelector('#sidebar nav ul');
+                if (sidebarNav) {
+                    const logoutItem = document.createElement('li');
+                    logoutItem.innerHTML = `
+                        <button id="logout-btn" class="w-full text-left flex items-center space-x-3 p-3 rounded-lg hover:bg-blue-50 dark:hover:bg-gray-700">
+                            <i class="fas fa-sign-out-alt text-red-500"></i>
+                            <span>Logout</span>
+                        </button>
+                    `;
+                    sidebarNav.appendChild(logoutItem);
+                    
+                    // Add logout handler
+                    document.getElementById('logout-btn').addEventListener('click', () => {
+                        appState.logout();
+                        mainApp.style.transform = 'translateX(100%)';
+                        authScreen.style.transform = 'translateX(0)';
+                    });
+                }
+            }
+            
+            // Login Form Submission
+            if (loginForm) {
+                loginForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    const emailInput = document.getElementById('login-email');
+                    const passwordInput = document.getElementById('login-password');
+                    let isValid = true;
+                    
+                    // Validate email
+                    if (!emailInput.value.trim() || !validateEmail(emailInput.value)) {
+                        showError(emailInput, 'Por favor, informe um email válido');
+                        isValid = false;
+                    } else {
+                        clearError(emailInput);
+                    }
+                    
+                    // Validate password
+                    if (!passwordInput.value) {
+                        showError(passwordInput, 'Por favor, informe sua senha');
+                        isValid = false;
+                    } else {
+                        clearError(passwordInput);
+                    }
+                    
+                    if (isValid) {
+                        const result = appState.login(emailInput.value, passwordInput.value);
+                        
+                        if (result.success) {
+                            // Show loading indicator
+                            const submitButton = loginForm.querySelector('button[type="submit"]');
+                            submitButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Entrando...';
+                            submitButton.disabled = true;
+                            
+                            // Simulate network delay
+                            setTimeout(() => {
+                                authenticate();
+                                
+                                // Reset form
+                                loginForm.reset();
+                                submitButton.innerHTML = 'Entrar';
+                                submitButton.disabled = false;
+                            }, 1000);
+                        } else {
+                            // Show appropriate error
+                            if (result.message === 'Usuário não encontrado') {
+                                showError(emailInput, result.message);
+                            } else {
+                                showError(passwordInput, result.message);
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // Register Form Submission
+            if (registerForm) {
+                registerForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    const nameInput = document.getElementById('register-name');
+                    const emailInput = document.getElementById('register-email');
+                    const passwordInput = document.getElementById('register-password');
+                    const confirmPasswordInput = document.getElementById('register-confirm-password');
+                    const termsAgreement = document.getElementById('terms-agreement');
+                    
+                    let isValid = true;
+                    
+                    // Validate name
+                    if (!nameInput.value.trim() || nameInput.value.trim().split(' ').length < 2) {
+                        showError(nameInput, 'Por favor, informe seu nome completo');
+                        isValid = false;
+                    } else {
+                        clearError(nameInput);
+                    }
+                    
+                    // Validate email
+                    if (!emailInput.value.trim() || !validateEmail(emailInput.value)) {
+                        showError(emailInput, 'Por favor, informe um email válido');
+                        isValid = false;
+                    } else {
+                        clearError(emailInput);
+                    }
+                    
+                    // Validate password
+                    if (!passwordInput.value || passwordInput.value.length < 6) {
+                        showError(passwordInput, 'A senha deve ter pelo menos 6 caracteres');
+                        isValid = false;
+                    } else {
+                        clearError(passwordInput);
+                    }
+                    
+                    // Validate password confirmation
+                    if (passwordInput.value !== confirmPasswordInput.value) {
+                        showError(confirmPasswordInput, 'As senhas não coincidem');
+                        isValid = false;
+                    } else {
+                        clearError(confirmPasswordInput);
+                    }
+                    
+                    // Validate terms agreement
+                    if (!termsAgreement.checked) {
+                        alert('Você precisa concordar com os termos de uso para criar uma conta');
+                        isValid = false;
+                    }
+                    
+                    if (isValid) {
+                        const result = appState.register(nameInput.value, emailInput.value, passwordInput.value);
+                        
+                        if (result.success) {
+                            // Show loading indicator
+                            const submitButton = registerForm.querySelector('button[type="submit"]');
+                            submitButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Criando conta...';
+                            submitButton.disabled = true;
+                            
+                            // Simulate network delay
+                            setTimeout(() => {
+                                authenticate();
+                                
+                                // Reset form
+                                registerForm.reset();
+                                submitButton.innerHTML = 'Criar Conta';
+                                submitButton.disabled = false;
+                            }, 1500);
+                        } else {
+                            showError(emailInput, result.message);
+                        }
+                    }
+                });
+            }
+            
+            // Password Recovery Form Submission
+            if (recoveryForm) {
+                recoveryForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    const emailInput = document.getElementById('recovery-email');
+                    let isValid = true;
+                    
+                    // Validate email
+                    if (!emailInput.value.trim() || !validateEmail(emailInput.value)) {
+                        showError(emailInput, 'Por favor, informe um email válido');
+                        isValid = false;
+                    } else {
+                        clearError(emailInput);
+                    }
+                    
+                    if (isValid) {
+                        // Show loading indicator
+                        const submitButton = recoveryForm.querySelector('button[type="submit"]');
+                        submitButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Enviando...';
+                        submitButton.disabled = true;
+                        
+                        // Simulate network delay
+                        setTimeout(() => {
+                            // Show success message
+                            recoveryForm.innerHTML = `
+                                <div class="text-center">
+                                    <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 text-green-600 mb-4">
+                                        <i class="fas fa-check text-2xl"></i>
+                                    </div>
+                                    <h2 class="text-xl font-bold text-primary dark:text-primary-light mb-2">Email enviado!</h2>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                                        Enviamos um email com instruções para recuperar sua senha para ${emailInput.value}
+                                    </p>
+                                    <button type="button" id="back-to-login-after-recovery" class="w-full bg-primary hover:bg-primary-dark dark:bg-primary-dark dark:hover:bg-primary text-white font-bold py-3 rounded-lg transition-colors shadow-md">
+                                        Voltar para Login
+                                    </button>
+                                </div>
+                            `;
+                            
+                            // Add handler for the new back button
+                            document.getElementById('back-to-login-after-recovery').addEventListener('click', () => {
+                                showForm(loginForm);
+                                loginTab.classList.add('border-primary', 'text-primary', 'dark:text-primary-light');
+                                registerTab.classList.remove('border-primary', 'text-primary', 'dark:text-primary-light');
+                                registerTab.classList.add('border-transparent', 'text-gray-500', 'dark:text-gray-400');
+                                
+                                // Recreate the recovery form for future use
+                                recoveryForm.innerHTML = `
+                                    <div class="text-center mb-4">
+                                        <h2 class="text-xl font-bold text-primary dark:text-primary-light">Recuperar Senha</h2>
+                                        <p class="text-sm text-gray-600 dark:text-gray-400">Informe seu email para receber instruções de recuperação de senha</p>
+                                    </div>
+                                    <div>
+                                        <label for="recovery-email" class="block text-sm font-medium mb-1">Email</label>
+                                        <input type="email" id="recovery-email" class="form-input w-full px-3 py-2 bg-blue-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-base transition-all" placeholder="seu@email.com" required>
+                                        <p class="error-message text-red-500 text-xs mt-1 hidden">Por favor, informe um email válido</p>
+                                    </div>
+                                    <button type="submit" class="w-full bg-primary hover:bg-primary-dark dark:bg-primary-dark dark:hover:bg-primary text-white font-bold py-3 rounded-lg transition-colors shadow-md">
+                                        Enviar Instruções
+                                    </button>
+                                    <button type="button" id="back-to-login" class="w-full bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-medium py-3 rounded-lg transition-colors mt-4">
+                                        Voltar
+                                    </button>
+                                `;
+                                
+                                // Reattach event listener to the back to login button
+                                document.getElementById('back-to-login').addEventListener('click', () => {
+                                    showForm(loginForm);
+                                });
+                            });
+                        }, 1500);
+                    }
+                });
+            }
+            
+            // Social Login Buttons
+            document.querySelectorAll('.social-login-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    // Set a demo user for this example
+                    appState.isAuthenticated = true;
+                    appState.currentUser = { id: 3, name: 'Usuário Social', email: 'social@exemplo.com' };
+                    
+                    // Show loading indicator
+                    this.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                    this.disabled = true;
+                    
+                    // Simulate authentication delay
+                    setTimeout(() => {
+                        authenticate();
+                        
+                        // Reset button
+                        this.innerHTML = this.querySelector('i').outerHTML;
+                        this.disabled = false;
+                    }, 1500);
+                });
             });
             
             // Welcome Screen to Main App transition
             const enterAppBtn = document.getElementById('enter-app');
-            const welcomeScreen = document.getElementById('welcome-screen');
-            const mainApp = document.getElementById('main-app');
             
-            enterAppBtn.addEventListener('click', () => {
-                welcomeScreen.style.transform = 'translateX(-100%)';
-                mainApp.style.transform = 'translateX(0)';
-            });
+            if (enterAppBtn) {
+                enterAppBtn.addEventListener('click', () => {
+                    welcomeScreen.style.transform = 'translateX(-100%)';
+                    mainApp.style.transform = 'translateX(0)';
+                });
+            }
             
             // Mobile Menu Toggle
             const menuToggle = document.getElementById('menu-toggle');
